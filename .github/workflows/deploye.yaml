@@ -58,4 +58,25 @@ jobs:
 
             docker-compose pull
             docker-compose up -d
-            docker image prune -f
+            docker image prune -
+            
+  notify:
+    name: Send Slack Notification
+    needs: [build_and_push, deploy]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send Success Notification
+        if: success()
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data "{\"text\":\"Deployment SUCCESS\nRepository: $GITHUB_REPOSITORY\nVersion: $GITHUB_RUN_NUMBER\nCommit: $GITHUB_SHA\n\"}" \
+          ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Send Failure Notification
+        if: failure()
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data "{\"text\":\"Deployment FAILED\nRepository: $GITHUB_REPOSITORY\nVersion: $GITHUB_RUN_NUMBER\nCommit: $GITHUB_SHA\n\"}" \
+          ${{ secrets.SLACK_WEBHOOK_URL }}
+
