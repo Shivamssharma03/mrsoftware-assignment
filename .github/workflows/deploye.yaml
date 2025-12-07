@@ -54,6 +54,8 @@ jobs:
             # Update backend image tag
             sed -i "s|mrsoftware-backend:.*|mrsoftware-backend:${{ github.run_number }}|g" docker-compose.yml
 
+            docker-compose down --remove-orphans || true
+
             docker-compose pull
             docker-compose up -d
             docker image prune -f
