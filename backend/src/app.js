@@ -15,8 +15,53 @@ const errorHandlers = require('./handlers/errorHandlers');
 const erpApiRouter = require('./routes/appRoutes/appApi');
 
 const fileUpload = require('express-fileupload');
-// create our Express app
+
+
+// -------------------------------------------------------
+// PROMETHEUS METRICS
+// -------------------------------------------------------
+const client = require("prom-client");
+
+client.collectDefaultMetrics();
+
+const httpRequestDuration = new client.Histogram({
+  name: "http_request_duration_seconds",
+  help: "Duration of HTTP requests in seconds",
+  labelNames: ["method", "route", "status_code"],
+});
+
 const app = express();
+
+// measure request duration
+app.use((req, res, next) => {
+  const end = httpRequestDuration.startTimer();
+  res.on("finish", () => {
+    end({
+      method: req.method,
+      route: req.route?.path || req.path,
+      status_code: res.statusCode
+    });
+  });
+  next();
+});
+
+// Health check
+app.get("/health", (req, res) => {
+  res.json({ status: "UP" });
+});
+
+// Metrics endpoint
+app.get("/metrics", async (req, res) => {
+  res.set("Content-Type", client.register.contentType);
+  res.end(await client.register.metrics());
+});
+
+// -------------------------------------------------------
+
+
+
+// // create our Express app
+// const app = express();
 
 app.use(
   cors({
