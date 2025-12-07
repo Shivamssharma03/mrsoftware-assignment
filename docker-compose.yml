@@ -2,8 +2,9 @@ version: "3.9"
 
 services:
   backend:
-    image: backend-image:latest
+    image: shivamsharma0309/mrsoftware-backend:13
     container_name: backend
+    restart: always
     ports:
       - "8888:8888"
     env_file:
@@ -12,10 +13,11 @@ services:
       - app-net
 
   frontend:
-    image: frontend-proxy:latest
+    image: shivamsharma0309/mrsoftware-frontend:13
     container_name: frontend
+    restart: always
     ports:
-      - "80:80"
+      - "8081:80"
     env_file:
       - ./frontend/.env
     depends_on:
