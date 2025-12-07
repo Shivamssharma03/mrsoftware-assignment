@@ -25,10 +25,11 @@ jobs:
           cd frontend
           docker build -t ${{ secrets.DOCKER_USERNAME }}/mrsoftware-frontend:${{ github.run_number }} .
           docker push ${{ secrets.DOCKER_USERNAME }}/mrsoftware-frontend:${{ github.run_number }}
-          
+
       - name: Build Backend Image
         run: |
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/mrsoftware-backend:${{ github.run_number }} -f backend/Dockerfile .
+          cd backend
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/mrsoftware-backend:${{ github.run_number }} .
           docker push ${{ secrets.DOCKER_USERNAME }}/mrsoftware-backend:${{ github.run_number }}
 
   deploy:
