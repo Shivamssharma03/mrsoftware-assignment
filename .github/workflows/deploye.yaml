@@ -58,7 +58,7 @@ jobs:
 
             docker-compose pull
             docker-compose up -d
-            docker image prune -
+            docker image prune -f
             
   notify:
     name: Send Slack Notification
