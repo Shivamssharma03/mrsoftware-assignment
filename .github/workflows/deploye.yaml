@@ -60,25 +60,46 @@ jobs:
             docker-compose up -d
             docker image prune -
             
-  notify:
-    name: Send Slack Notification
-    needs: [build_and_push, deploy]
-    if: always() 
+            
+  notify_build:
+    name: Build Notification
+    needs: build_and_push
     runs-on: ubuntu-latest
+    if: always()
 
     steps:
-      - name: Send Success Notification
-      
-        if: success()
+      - name: Build Success Notification
+        if: needs.build_and_push.result == 'success'
         run: |
           curl -X POST -H 'Content-type: application/json' \
-          --data "{\"text\":\"Deployment SUCCESS\nRepository: $GITHUB_REPOSITORY\nVersion: $GITHUB_RUN_NUMBER\nCommit: $GITHUB_SHA\n\"}" \
+          --data "{\"text\":\"🟢 *BUILD SUCCESS*\nRepository: $GITHUB_REPOSITORY\nVersion: $GITHUB_RUN_NUMBER\nCommit: $GITHUB_SHA\"}" \
           ${{ secrets.SLACK_WEBHOOK_URL }}
 
-      - name: Send Failure Notification
-        if: failure()
+      - name: Build Failed Notification
+        if: needs.build_and_push.result != 'success'
         run: |
           curl -X POST -H 'Content-type: application/json' \
-          --data "{\"text\":\"Deployment FAILED\nRepository: $GITHUB_REPOSITORY\nVersion: $GITHUB_RUN_NUMBER\nCommit: $GITHUB_SHA\n\"}" \
+          --data "{\"text\":\"🔴 *BUILD FAILED*\nRepository: $GITHUB_REPOSITORY\nVersion: $GITHUB_RUN_NUMBER\nCommit: $GITHUB_SHA\nCheck GitHub logs.\"}" \
           ${{ secrets.SLACK_WEBHOOK_URL }}
 
+
+  notify_deploy:
+    name: Deploy Notification
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Deploy Success Notification
+        if: needs.deploy.result == 'success'
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data "{\"text\":\"🔵 *DEPLOY SUCCESS*\nVersion: $GITHUB_RUN_NUMBER\nServer updated successfully.\"}" \
+          ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Deploy Failed Notification
+        if: needs.deploy.result != 'success'
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+          --data "{\"text\":\"🔴 *DEPLOY FAILED*\nVersion: $GITHUB_RUN_NUMBER\nCheck deployment logs.\"}" \
+          ${{ secrets.SLACK_WEBHOOK_URL }}
