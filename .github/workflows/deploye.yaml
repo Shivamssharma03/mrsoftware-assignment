@@ -58,9 +58,9 @@ jobs:
 
             docker-compose pull
             docker-compose up -d
-            docker image prune -
+            docker image prune -f
             
-            
+
   notify_build:
     name: Build Notification
     needs: build_and_push
@@ -72,14 +72,14 @@ jobs:
         if: needs.build_and_push.result == 'success'
         run: |
           curl -X POST -H 'Content-type: application/json' \
-          --data "{\"text\":\"🟢 *BUILD SUCCESS*\nRepository: $GITHUB_REPOSITORY\nVersion: $GITHUB_RUN_NUMBER\nCommit: $GITHUB_SHA\"}" \
+          --data "{\"text\":\" *BUILD SUCCESS*\nRepository: $GITHUB_REPOSITORY\nVersion: $GITHUB_RUN_NUMBER\nCommit: $GITHUB_SHA\"}" \
           ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Build Failed Notification
         if: needs.build_and_push.result != 'success'
         run: |
           curl -X POST -H 'Content-type: application/json' \
-          --data "{\"text\":\"🔴 *BUILD FAILED*\nRepository: $GITHUB_REPOSITORY\nVersion: $GITHUB_RUN_NUMBER\nCommit: $GITHUB_SHA\nCheck GitHub logs.\"}" \
+          --data "{\"text\":\" *BUILD FAILED*\nRepository: $GITHUB_REPOSITORY\nVersion: $GITHUB_RUN_NUMBER\nCommit: $GITHUB_SHA\nCheck GitHub logs.\"}" \
           ${{ secrets.SLACK_WEBHOOK_URL }}
 
 
@@ -94,12 +94,12 @@ jobs:
         if: needs.deploy.result == 'success'
         run: |
           curl -X POST -H 'Content-type: application/json' \
-          --data "{\"text\":\"🔵 *DEPLOY SUCCESS*\nVersion: $GITHUB_RUN_NUMBER\nServer updated successfully.\"}" \
+          --data "{\"text\":\" *DEPLOY SUCCESS*\nVersion: $GITHUB_RUN_NUMBER\nServer updated successfully.\"}" \
           ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Deploy Failed Notification
         if: needs.deploy.result != 'success'
         run: |
           curl -X POST -H 'Content-type: application/json' \
-          --data "{\"text\":\"🔴 *DEPLOY FAILED*\nVersion: $GITHUB_RUN_NUMBER\nCheck deployment logs.\"}" \
+          --data "{\"text\":\" *DEPLOY FAILED*\nVersion: $GITHUB_RUN_NUMBER\nCheck deployment logs.\"}" \
           ${{ secrets.SLACK_WEBHOOK_URL }}
