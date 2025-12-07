@@ -58,15 +58,17 @@ jobs:
 
             docker-compose pull
             docker-compose up -d
-            docker image prune -f
+            docker image prune -
             
   notify:
     name: Send Slack Notification
     needs: [build_and_push, deploy]
+    if: always() 
     runs-on: ubuntu-latest
 
     steps:
       - name: Send Success Notification
+      
         if: success()
         run: |
           curl -X POST -H 'Content-type: application/json' \
